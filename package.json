@@ -1,0 +1,33 @@
+{
+  "name": "be-walletbot",
+  "version": "1.0.0",
+  "description": "Backend of AI-integrated expense management application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dung1311/BE-WalletBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dung1311/BE-WalletBot/issues"
+  },
+  "homepage": "https://github.com/dung1311/BE-WalletBot#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "be-walletbot": "file:",
+    "compression": "^1.7.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0"
+  }
+}
