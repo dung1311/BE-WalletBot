@@ -1,4 +1,6 @@
-const UserService = require("../services/user.service"); // Lấy UserService
+const UserService = require("../services/user.service");
+const KeyTokenService = require("../services/keytoken.service");
+const KeyToken = require("../models/keytoken.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -35,14 +37,49 @@ class AuthController {
         if (!isMatch) {
             return res.status(400).json({ message: "Mật khẩu không đúng" });
         }
+        
+        const payload = {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        };
+        const accessToken = KeyTokenService.generateAccessToken(payload);
+        const refreshToken = KeyTokenService.generateRefreshToken(payload);
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
-
-        return res.status(200).json({
-            message: "Đăng nhập thành công",
-            token,
-        });
+        let keyToken = await KeyTokenService.getKeyTokenById(user._id);
+        console.log(keyToken.refreshToken);
+        if(!keyToken){
+          keyToken = KeyTokenService.createKeyToken({
+            userID: user._id,
+            refreshToken: [refreshToken],
+          });
+        }
+        else{
+         await KeyTokenService.updateTokens(user._id, refreshToken);
+        }
+        res.json({ accessToken, refreshToken });
     }
+    static refreshAccessToken = async (req, res) => {
+      const { refreshToken } = req.body;
+      if (!refreshToken) {
+          return res.status(400).json({ message: "Refresh Token is required." });
+      }
+  
+      try {
+          const decoded = JwtService.verifyRefreshToken(refreshToken);
+          const keyToken = KeyTokenService.getKeyTokenById(decoded.id);
+  
+          if (!keyToken || !keyToken.refreshToken.includes(refreshToken)) {
+              return res.status(403).json({ message: "Invalid Refresh Token." });
+          }
+
+          const newAccessToken = JwtService.generateAccessToken({ id: decoded.id, name: decoded.name, email: decoded.email });
+  
+          res.json({ accessToken: newAccessToken });
+      } catch (error) {
+          res.status(403).json({ message: "Invalid or Expired Refresh Token." });
+      }
+  };
 }
 
 module.exports = AuthController;
