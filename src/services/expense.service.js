@@ -76,7 +76,14 @@ class FeeService {
         }
     }
 
-    static addExpense = async ({amount, category, description, userId}) => {
+    static addExpense = async ({amount, category, description}, userId) => {
+        if(!checkValidId(userId)){
+            return {
+                code: 400,
+                message: "Invalid userId",
+                metadata: null 
+            }
+        }
         const newExpense = await expenseModel.create({
             userId: userId,
             amount: amount,

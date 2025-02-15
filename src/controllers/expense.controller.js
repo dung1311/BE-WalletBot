@@ -5,7 +5,7 @@ const FeeService = require("../services/expense.service");
 
 class FeeController {
     addExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.addExpense(req.body);
+        const response = await FeeService.addExpense(req.body, req.user.id);
         return res.status(response.code).json(response);
     });
 
