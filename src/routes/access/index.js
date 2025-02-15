@@ -7,6 +7,7 @@ const AuthController = require("../../controllers/auth.controller");
 router.post("/login", AuthController.login);
 router.post("/register", AuthController.register);
 router.post("/refresh-token", AuthController.refreshAccessToken);
+router.post("/logout", AuthController.logout);
 router.get("/index", (req, res) => {
     res.send("hello v1/api");
 });
