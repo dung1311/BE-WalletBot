@@ -11,6 +11,7 @@ class FeeService {
             searchText,
             startDate,
             endDate,
+            limit
           } = Body;
         const filter = { userId };
         if (startDate || endDate) {
@@ -22,7 +23,13 @@ class FeeService {
         if (searchText) filter.description = { $regex: searchText, $options: 'i' };
         const sortOption = { ['createdAt']: -1 };
         try {
-            const expenses = await expenseModel.find(filter).sort(sortOption);
+            let query = expenseModel.find(filter).sort(sortOption);
+
+            if (limit) {
+                query = query.limit(limit);
+            }
+            
+            const expenses = await query;
             
             return {
                 code: 200,
@@ -41,10 +48,13 @@ class FeeService {
     };
     
 
-    static addExpense = async ({amount, category, description, userId}) => {
+    static addExpense = async ({amount, wallet, partner, type, category, description, userId}) => {
         const newExpense = await expenseModel.create({
             userId: userId,
             amount: amount,
+            wallet: wallet,
+            type: type,
+            partner: partner,
             description: description,
             category: category
         });
