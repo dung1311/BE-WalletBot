@@ -16,7 +16,7 @@ class AuthController {
     static refreshAccessToken = async (req, res) => {
         const response = await KeyTokenService.refreshAccessToken(req, res);
         return response;
-  };
+    };
     static async logout(req, res) {
         const response = await UserService.logout(req, res);
         return response;
