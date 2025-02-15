@@ -45,12 +45,12 @@ class UserService {
     }
     static async register(req, res){
         const {name, email, password} = req.body;
-
         const existingUser = await UserService.getUserByEmail(email);
         if(existingUser){
             return res.status(400).json({message: "Email already registered"});
         }
-        const newUser = await User.create({ name: name, email: email, password: password });
+        const hashPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({ name: name, email: email, password: hashPassword });
         const payload = {
             id: newUser._id,
             name: newUser.name,
@@ -64,7 +64,6 @@ class UserService {
             refreshToken: refreshToken,
         });
         return res.status(201).json({accessToken, refreshToken});
-
     }
     static async login(req, res) {
         const { email, password } = req.body;
@@ -91,13 +90,13 @@ class UserService {
         if(!keyToken){
             keyToken = KeyTokenService.createKeyToken({
                 userID: user._id,
-                refreshToken: [refreshToken],
+                refreshToken: refreshToken,
             });
         }
         else{
             await KeyTokenService.updateTokens(user._id, refreshToken);
         }
-        res.status(200).json({ accessToken });
+        res.status(200).json({ accessToken, refreshToken });
     }
     static async logout(req, res) {
         const {email} = req.body;
@@ -108,7 +107,6 @@ class UserService {
         }catch(error){
             return res.status(400).json({message:"Logged out failed"});
         }
-
     }
 }
 module.exports = UserService;
