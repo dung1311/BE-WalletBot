@@ -23,7 +23,6 @@ class Database {
     mongoose
       .connect(CONNECT_STRING_DB)
       .then((_) => {
-        console.log(`Database: ${CONNECT_STRING_DB}`);
         console.log("Database connection successful");
       })
       .catch(err => {console.error("Database connection error", err)});
