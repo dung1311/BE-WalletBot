@@ -4,9 +4,17 @@ const expenseModel = require("../models/expense.model");
 const {getInfoData, checkValidId, removeNullUndefinedAttribute} = require("../utils/index");
 
 class FeeService {
-    static getExpense = async ({pageSize=10, page=1}) => {
+    static getExpense = async ({pageSize=10, page=1}, userId) => {
+        if(!checkValidId(userId)) {
+            return {
+                code: 400,
+                message: "Invalid expenseId",
+                metadata: null 
+            }
+        }
+
         const expenses = await expenseModel
-        .find({})
+        .find({userId: userId})
         .sort({_id: -1})
         .skip((page-1)*pageSize)
         .limit(pageSize)
@@ -20,16 +28,16 @@ class FeeService {
         }
     };
 
-    static findExpense = async ({expenseId}) => {
-        if(!checkValidId(expenseId)){
+    static findExpense = async ({expenseId}, userId) => {
+        if(!checkValidId(expenseId) || !checkValidId(userId)){
             return {
                 code: 400,
-                message: "Invalid expenseId",
+                message: "Invalid expenseId or userId",
                 metadata: {}
             }
         }
 
-        const holderExpense = await expenseModel.findById(expenseId)
+        const holderExpense = await expenseModel.find({_id: expenseId, userId: userId})
         if(!holderExpense){
             return {
                 code: 404,
@@ -45,10 +53,18 @@ class FeeService {
         }
     }
 
-    static searchExpense = async ({keySearch}) => {
+    static searchExpense = async ({keySearch}, userId) => {
+        if(!checkValidId(userId)){
+            return {
+                code: 400,
+                message: "Invalid userId",
+                metadata: {}
+            }
+        }
+
         const regexSearch = new RegExp(keySearch)
         const results = await expenseModel.find(
-            {$text: { $search: regexSearch}}
+            {userId: userId, $text: { $search: regexSearch}}
         )
 
         return {
@@ -60,7 +76,14 @@ class FeeService {
         }
     }
 
-    static addExpense = async ({amount, category, description, userId}) => {
+    static addExpense = async ({amount, category, description}, userId) => {
+        if(!checkValidId(userId)){
+            return {
+                code: 400,
+                message: "Invalid userId",
+                metadata: null 
+            }
+        }
         const newExpense = await expenseModel.create({
             userId: userId,
             amount: amount,
@@ -86,16 +109,16 @@ class FeeService {
 
     };
 
-    static deleteExpenseById = async({expenseId}) => {
-        if(!checkValidId(expenseId)) {
+    static deleteExpenseById = async({expenseId}, userId) => {
+        if(!checkValidId(expenseId) || !checkValidId(userId)) {
             return {
                 code: 400,
-                message: "Invalid expenseId",
+                message: "Invalid expenseId or userId",
                 metadata: null 
             }
         }
 
-        const holderExpense = await expenseModel.findByIdAndDelete(expenseId)
+        const holderExpense = await expenseModel.findOneAndDelete({_id: expenseId, userId: userId});
 
         if(!holderExpense) {
             return {
@@ -114,18 +137,18 @@ class FeeService {
         }
     }
 
-    static updateExpense = async({expenseId}, bodyUpdate) => {
-        if(!checkValidId(expenseId)){
+    static updateExpense = async({expenseId}, bodyUpdate, userId) => {
+        if(!checkValidId(expenseId) || !checkValidId(userId)){
             return {
                 code: 400,
-                message: "Invalid expenseId",
+                message: "Invalid expenseId or userId",
                 metadata: {}
             }
         }
 
         const updateAttribute = removeNullUndefinedAttribute(bodyUpdate);
         
-        const holderExpense = await expenseModel.findOneAndUpdate({_id: expenseId}, updateAttribute, {new: true, runValidators: true})
+        const holderExpense = await expenseModel.findOneAndUpdate({_id: expenseId, userId: userId}, updateAttribute, {new: true, runValidators: true})
         if(!holderExpense){
             return {
                 code: 404,

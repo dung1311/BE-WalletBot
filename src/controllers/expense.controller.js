@@ -5,12 +5,13 @@ const FeeService = require("../services/expense.service");
 
 class FeeController {
     addExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.addExpense(req.body);
+        const response = await FeeService.addExpense(req.body, req.user.id);
         return res.status(response.code).json(response);
     });
 
     getExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.getExpense({});
+        // console.log(req.user.id)
+        const response = await FeeService.getExpense({}, req.user.id);
         return res.status(response.code).json(response);
     });
 
@@ -20,17 +21,17 @@ class FeeController {
     })
 
     searchExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.searchExpense(req.params)
+        const response = await FeeService.searchExpense(req.params, req.user.id)
         return res.status(response.code).json(response)
     })
 
     deleteExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.deleteExpenseById(req.params);
+        const response = await FeeService.deleteExpenseById(req.params, req.user.id);
         return res.status(response.code).json(response)
     })
 
     updateExpense = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.updateExpense(req.params, req.body);
+        const response = await FeeService.updateExpense(req.params, req.body, req.user.id);
         return res.status(response.code).json(response)
     })
 }
