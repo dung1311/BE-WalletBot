@@ -10,7 +10,7 @@ class FeeController {
     });
 
     getFee = asyncHandler(async (req, res, next) => {
-        const response = await FeeService.getFee();
+        const response = await FeeService.getFee(req.body);
         return res.status(200).json(response);
     });
 }
