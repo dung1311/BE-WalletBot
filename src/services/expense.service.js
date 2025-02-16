@@ -131,9 +131,9 @@ class FeeService {
         const newExpense = await expenseModel.create({
             userId: userId,
             amount: amount,
-            wallet: wallet,
-            type: type,
-            partner: partner,
+            // wallet: wallet,
+            // type: type,
+            // partner: partner,
             description: description,
             category: category
         });
