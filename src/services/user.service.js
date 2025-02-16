@@ -83,21 +83,26 @@ class UserService {
             name: user.name,
             email: user.email,
         };
-        const accessToken = KeyTokenService.generateAccessToken(payload);
-        const refreshToken = KeyTokenService.generateRefreshToken(payload);
+        const newAccessToken = KeyTokenService.generateAccessToken(payload);
+        const newRefreshToken = KeyTokenService.generateRefreshToken(payload);
 
         let keyToken = await KeyTokenService.getKeyTokenById(user._id);
+
         if(!keyToken){
             keyToken = KeyTokenService.createKeyToken({
                 userID: user._id,
-                refreshToken: refreshToken,
+                refreshToken: newRefreshToken
             });
         }
         else{
-            await KeyTokenService.updateTokens(user._id, refreshToken);
+            const refreshToken = keyToken.refreshToken
+            await KeyTokenService.updateTokens(user._id, refreshToken, newRefreshToken);
         }
-        res.status(200).json({ accessToken, refreshToken });
+
+
+        res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
     }
+    
     static async logout(req, res) {
         const {email} = req.body;
         const user = await UserService.getUserByEmail(email);
@@ -109,4 +114,5 @@ class UserService {
         }
     }
 }
+
 module.exports = UserService;

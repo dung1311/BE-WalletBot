@@ -1,6 +1,7 @@
 'use strict';
 const jwt = require('jsonwebtoken');
 const KeyToken = require('../models/keytoken.model');
+const keytokenModel = require('../models/keytoken.model');
 class KeyTokenService{
     static async getKeyTokenById(id) {
         try {
@@ -10,25 +11,29 @@ class KeyTokenService{
             throw new Error(error);
         }
     }
+
     static async createKeyToken(data){
         return await KeyToken.create(data);
     }
+
     static async deleteKeyToken(id) {
         try{
-            const deleteKeyToken = await KeyToken.findOneAndDelete({userID: id});
+            await KeyToken.findOneAndDelete({userID: id});
         }catch (error){
             throw new Error(error);
         }
     }
-    static async updateTokens(userID, refreshToken) {
+
+    static async updateTokens(userID, refreshToken, newRefreshToken) {
 
         await KeyToken.findOneAndUpdate(
             { userID: userID },
-            { $push: { refreshToken: refreshToken } },
+            { $push: { refreshTokenUsed: refreshToken }, refreshToken: newRefreshToken },
             { new: true }
         );
         const key = await KeyTokenService.getKeyTokenById(userID);
     }
+
     static generateAccessToken(payload){
         const token = jwt.sign(payload, process.env.JWT_SECRET_ACCESS, {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
@@ -46,23 +51,58 @@ class KeyTokenService{
     static verifyAccessToken(token){
         return jwt.verify(token, process.env.JWT_SECRET_ACCESS);
     }
+
     static verifyRefreshToken(token){
         return jwt.verify(token, process.env.JWT_SECRET_REFRESH);
     }
+    
     static async refreshAccessToken(req, res){
-        const { refreshToken} = req.body;
+        const refreshToken = req.refreshToken;
+
         if (!refreshToken) {
-            return res.status(400).json({ message: "Refresh Token is required." });
+            return {
+                code: 400,
+                message: "refresh token is required",
+                metadata: null
+            }
         }
         try {
             const decoded = KeyTokenService.verifyRefreshToken(refreshToken);
-            const keyToken = await KeyTokenService.getKeyTokenById(decoded.id);
-            if (!keyToken || !keyToken.refreshToken.includes(refreshToken)) {
-                return res.status(403).json({ message: "Invalid Refresh Token." });
+            const userId = decoded.id
+            const keyToken = await KeyTokenService.getKeyTokenById(userId);
+
+            if(!keyToken){
+                return {
+                    code: 400,
+                    message: "Cannot find keytoken with userId",
+                    metadata: null
+                }
             }
-            const newAccessToken = KeyTokenService.generateAccessToken({ id: decoded.id, name: decoded.name, email: decoded.email });
-            console.log(newAccessToken);
-            res.json({ accessToken: newAccessToken });
+
+            if(keyToken.refreshTokenUsed.includes(refreshToken)){
+                await KeyTokenService.deleteKeyToken(userId);
+
+                return {
+                    code: 400,
+                    message: "Something wrong, please relogin",
+                    metadata: null
+                }
+            }
+
+            if(refreshToken !== keyToken.refreshToken){
+                return {
+                    code: 400,
+                    message: "refresh token is not valid",
+                    metadata: null
+                }
+            }
+
+            const newAccessToken = KeyTokenService.generateAccessToken({ id: userId, name: decoded.name, email: decoded.email });
+            const newRefreshToken = KeyTokenService.generateRefreshToken({id: userId, name: decoded.name, email: decoded.email});
+
+            await KeyTokenService.updateTokens(userId, refreshToken, newRefreshToken);
+
+            res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
         } catch (error) {
             res.status(403).json({ message: "Invalid or Expired Refresh Token." });
         }
