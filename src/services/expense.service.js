@@ -5,6 +5,7 @@ const {getInfoData} = require("../utils/index")
 
 class FeeService {
     static getFee = async (Body) => {
+        console.log(Body);
         const {
             userId,
             category,
