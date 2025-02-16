@@ -5,7 +5,8 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { db: { host, port, name } } = require("../configs/config.mongodb");
-const CONNECT_STRING_DB = `mongodb://${host}:${port}/${name}`;
+// const CONNECT_STRING_DB = `mongodb://${host}:${port}/${name}`;
+const CONNECT_STRING_DB = process.env.DB_CLOUD
 
 class Database {
   constructor() {
@@ -22,7 +23,6 @@ class Database {
     mongoose
       .connect(CONNECT_STRING_DB)
       .then((_) => {
-        console.log(`Database: ${CONNECT_STRING_DB}`);
         console.log("Database connection successful");
       })
       .catch(err => {console.error("Database connection error", err)});
