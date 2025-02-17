@@ -12,19 +12,19 @@ const expenseSchema = new Schema(
       type: Number,
       required: true,
     },
-    // wallet: {
-    //   type: String,
-    //   required: true,
-    // },
-    // partner: {
-    //   type: String,
-    //   required: true,
-    // },
-    // type: {
-    //   type: String,
-    //   required: true,
-    //   enum: ["Gửi", "Nhận"],
-    // },
+    wallet: {
+      type: String,
+      required: true,
+    },
+    partner: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["Gửi", "Nhận"],
+    },
     category: {
       type: String,
       required: true,
