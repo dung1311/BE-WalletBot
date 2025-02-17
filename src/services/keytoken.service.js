@@ -84,7 +84,7 @@ class KeyTokenService{
 
                 return {
                     code: 400,
-                    message: "Something wrong, please relogin",
+                    message: "Something wrong, please re-login",
                     metadata: null
                 }
             }

@@ -21,6 +21,16 @@ class AuthController {
         const response = await UserService.logout(req, res);
         return response;
     }
+    static async otp(req, res) {
+        const {email} = req.body;
+        const response = await UserService.sendOTP(email);
+        return res.status(response.code).json(response);
+    }
+    static async verifyOTP(req, res) {
+        const {email, otpCode} = req.body;
+        const response = await UserService.verifyOTP(email, otpCode);
+        return res.status(response.code).json(response);
+    }
 }
 
 module.exports = AuthController;

@@ -1,9 +1,10 @@
 "use strict";
 
 const User = require("../models/user.model");
-const {getInfoData} = require("../utils/index")
+const {getInfoData, sendEmail} = require("../utils/index")
 const bcrypt = require("bcryptjs");
 const KeyTokenService = require("./keytoken.service");
+const random  = require("lodash");
 class UserService {
     static async getAllUsers() {
         try {
@@ -98,8 +99,6 @@ class UserService {
             const refreshToken = keyToken.refreshToken
             await KeyTokenService.updateTokens(user._id, refreshToken, newRefreshToken);
         }
-
-
         res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
     }
     
@@ -112,6 +111,76 @@ class UserService {
         }catch(error){
             return res.status(400).json({message:"Logged out failed"});
         }
+    }
+    static async generateOTP(email){
+        try{
+            const otpCode = random.random(100000, 999999).toString();
+            const expiresAt = new Date(Date.now() + 5*60*1000);
+            const user = await UserService.getUserByEmail(email);
+            if(!user) return 0;
+            await User.findOneAndUpdate(
+                {email},
+                {otp: {code: otpCode, expiresAt: expiresAt}},
+                {new: true},
+            )
+            return otpCode;
+        }catch(error){
+            throw new Error(error);
+        }
+        
+    }
+    static async verifyOTP(email, otpCode){
+        const user = await UserService.getUserByEmail(email);
+        if(!user || !user.otp || user.otp.code !== otpCode) 
+            return {
+                code: 400,
+                message: 'Wrong OTP',
+                metadata: null
+        }   
+        if(user.otp.expiresAt < Date.now())
+            return {
+                code: 400,
+                message: 'Expired OTP',
+                metadata: null
+        }
+        await User.findOneAndUpdate(
+            {email: email},
+            {$unset: {otp: 1}}
+        );
+        return {
+            code: 200,
+            message: 'Right OTP',
+            metadata: null
+        }
+    }
+    static async sendOTP(email){
+        try {
+            const otpCode = await UserService.generateOTP(email);
+            if(otpCode === 0){
+                return {
+                    code: 400,
+                    message: "Please enter your email exactly!",
+                    metadata: null,
+                }
+            }
+            const content = `Here is your OTP CODE: ${otpCode}`;
+            await sendEmail(content, email);
+            return {
+                code: 201,
+                message: 'Sent OTP',
+                metadata: {
+                    otpCode: otpCode,
+                }
+            }
+        }catch(err){
+            console.error(err);
+            return {
+                code: 500,
+                message: "Can't send OTP, try again",
+                metadata: null
+            }
+        }
+        
     }
 }
 
