@@ -35,6 +35,7 @@ class FeeController {
     })
 
     updateExpense = asyncHandler(async (req, res, next) => {
+        console.log(req.params)
         const response = await FeeService.updateExpense(req.params, req.body, req.user.id);
         return res.status(response.code).json(response)
     })

@@ -209,6 +209,7 @@ class FeeService {
 
     static updateExpense = async({expenseId}, bodyUpdate, userId) => {
         if(!checkValidId(expenseId) || !checkValidId(userId)){
+            console.log(expenseId)
             return {
                 code: 400,
                 message: "Invalid expenseId or userId",
@@ -230,7 +231,7 @@ class FeeService {
         return {
             code: 200,
             message: "Update success",
-            metadata: getInfoData({fields: ["_id", "amount", "description", "category"], object: holderExpense})
+            metadata: holderExpense
         }
     }
 }
