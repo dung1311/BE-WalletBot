@@ -3,7 +3,8 @@ const nodemailer = require("nodemailer");
 const _ = require("lodash");
 const { default: mongoose } = require("mongoose");
 const { subtle } = require("crypto");
-
+const dotenv = require("dotenv");
+dotenv.config();
 const getInfoData = ({fields = [], object = {}}) => {
     return _.pick(object, fields);
 }

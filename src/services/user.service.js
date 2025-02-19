@@ -5,6 +5,7 @@ const {getInfoData, sendEmail} = require("../utils/index")
 const bcrypt = require("bcryptjs");
 const KeyTokenService = require("./keytoken.service");
 const random  = require("lodash");
+const OTPService = require("./otp.service");
 class UserService {
     static async getAllUsers() {
         try {
@@ -126,8 +127,7 @@ class UserService {
             return otpCode;
         }catch(error){
             throw new Error(error);
-        }
-        
+        }  
     }
     static async verifyOTP(email, otpCode){
         const user = await UserService.getUserByEmail(email);
@@ -155,7 +155,7 @@ class UserService {
     }
     static async sendOTP(email){
         try {
-            const otpCode = await UserService.generateOTP(email);
+            const otpCode = await OTPService.generateOTP(email);
             if(otpCode === 0){
                 return {
                     code: 400,

@@ -3,6 +3,7 @@ const KeyTokenService = require("../services/keytoken.service");
 const KeyToken = require("../models/keytoken.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const OTPService = require("../services/otp.service");
 
 class AuthController {
     static async register(req, res) {
@@ -28,7 +29,7 @@ class AuthController {
     }
     static async verifyOTP(req, res) {
         const {email, otpCode} = req.body;
-        const response = await UserService.verifyOTP(email, otpCode);
+        const response = await OTPService.verifyOTP(email, otpCode);
         return res.status(response.code).json(response);
     }
 }
