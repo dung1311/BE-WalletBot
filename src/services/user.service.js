@@ -4,8 +4,8 @@ const User = require("../models/user.model");
 const {getInfoData, sendEmail} = require("../utils/index")
 const bcrypt = require("bcryptjs");
 const KeyTokenService = require("./keytoken.service");
-const random  = require("lodash");
 const OTPService = require("./otp.service");
+const client = require("../models/clientRedis.model.js");
 class UserService {
     static async getAllUsers() {
         try {
@@ -45,14 +45,44 @@ class UserService {
             throw new Error(error);
         }
     }
-    static async register(req, res){
-        const {name, email, password} = req.body;
+    static async register(req) {
+        const {email, name, password} = req.body;
         const existingUser = await UserService.getUserByEmail(email);
         if(existingUser){
-            return res.status(400).json({message: "Email already registered"});
+            return {
+                code: 400, 
+                message: "Email already registered",
+                metadata: null,
+            };
         }
         const hashPassword = await bcrypt.hash(password, 10);
-        const newUser = await User.create({ name: name, email: email, password: hashPassword });
+        const dataUser = {
+            name: name,
+            email: email,
+            password: hashPassword
+        }
+        req.session.user = dataUser;
+        await client.set(`sessionId:${req.session.id}`, JSON.stringify(dataUser), {EX: 300});
+        const sendOTP = await UserService.sendOTP(email);
+        sendOTP.metadata.sessionId = req.session.id;
+        return sendOTP;
+
+    }
+    static async confirmRegister(req) {
+        const { email, otpCode, sessionId} = req.body;
+        const verifyOTP = await OTPService.verifyOTP(email, otpCode);
+        if(verifyOTP.code !== 200){
+            return verifyOTP;
+        }
+        const curUserString = await client.get(`sessionId:${sessionId}`);
+        if(!curUserString) return {
+            code: 400,
+            message: "Session expired or invalid",
+            metadata: null,
+        }
+        const curUser = JSON.parse(curUserString);
+        const newUser = await User.create(curUser);
+        req.session.destroy();
         const payload = {
             id: newUser._id,
             name: newUser.name,
@@ -65,19 +95,32 @@ class UserService {
             userID: newUser.id,
             refreshToken: refreshToken,
         });
-        return res.status(201).json({accessToken, refreshToken});
+        return {
+            code: 201,
+            message: "Create new user successfully",
+            metadata: {
+                "access_token": accessToken,
+                "refresh_token": refreshToken
+            }
+        };
     }
-    static async login(req, res) {
-        const { email, password } = req.body;
-
+    static async login(email, password) {
         const user = await UserService.getUserByEmail(email);
         if (!user) {
-            return res.status(400).json({ message: "Email is not exist" });
+            return {
+                code: 400,
+                message: "Email is not exist",
+                metadata: null,
+            }
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: "Password wrong" });
+            return {
+                code: 400,
+                message: "Password wrong",
+                metadata: null,
+            }
         }
         
         const payload = {
@@ -100,57 +143,60 @@ class UserService {
             const refreshToken = keyToken.refreshToken
             await KeyTokenService.updateTokens(user._id, refreshToken, newRefreshToken);
         }
-        res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+        return {
+            code: 200,
+            message: "Login successful",
+            metadata: {
+                accessToken: newAccessToken, refreshToken: newRefreshToken
+            }
+        }
     }
-    
-    static async logout(req, res) {
-        const {email} = req.body;
+    static async forgotPassword(email){
+        const sendOTP = await UserService.sendOTP(email);
+        return sendOTP;
+    }
+    static async resetPassword(email, otpCode, newPassword, reNewPassword){
+        if(newPassword !== reNewPassword) return {
+            code: 400,
+            message: "New password and reNew Password do not match",
+            metadata: null,
+        }
+        const verifyOTP = await OTPService.verifyOTP(email, otpCode);
+        if(verifyOTP.code !== 200) return verifyOTP;
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        const resetUser = await User.findOneAndUpdate(
+            {email: email},
+            {password: newPasswordHash},
+            {new: true},
+        )
+        if (!resetUser) {
+            return { 
+                code: 500, 
+                message: "Failed to reset password",
+                metadata: null,
+            };
+        }
+        return {
+            code: 200,
+            message: "Password changed",
+            metadata: null,
+        }
+    }
+    static async logout(email) {
         const user = await UserService.getUserByEmail(email);
         try{
             await KeyTokenService.deleteKeyToken(user._id);
-            return res.status(200).json({message:"Logged out successfully"});
-        }catch(error){
-            return res.status(400).json({message:"Logged out failed"});
-        }
-    }
-    static async generateOTP(email){
-        try{
-            const otpCode = random.random(100000, 999999).toString();
-            const expiresAt = new Date(Date.now() + 5*60*1000);
-            const user = await UserService.getUserByEmail(email);
-            if(!user) return 0;
-            await User.findOneAndUpdate(
-                {email},
-                {otp: {code: otpCode, expiresAt: expiresAt}},
-                {new: true},
-            )
-            return otpCode;
-        }catch(error){
-            throw new Error(error);
-        }  
-    }
-    static async verifyOTP(email, otpCode){
-        const user = await UserService.getUserByEmail(email);
-        if(!user || !user.otp || user.otp.code !== otpCode) 
             return {
-                code: 400,
-                message: 'Wrong OTP',
-                metadata: null
-        }   
-        if(user.otp.expiresAt < Date.now())
+                code: 200,
+                message: "Logged out successfully",
+                metadata: null,
+            }
+        }catch(error){
             return {
-                code: 400,
-                message: 'Expired OTP',
-                metadata: null
-        }
-        await User.findOneAndUpdate(
-            {email: email},
-            {$unset: {otp: 1}}
-        );
-        return {
-            code: 200,
-            message: 'Right OTP',
-            metadata: null
+                code: 404,
+                message: "Logged out failed",
+                metadata: null,
+            }
         }
     }
     static async sendOTP(email){
@@ -170,6 +216,7 @@ class UserService {
                 message: 'Sent OTP',
                 metadata: {
                     otpCode: otpCode,
+                    sessionId: null,
                 }
             }
         }catch(err){

@@ -1,16 +1,17 @@
 'use strict';
-const {client} = require('../dbs/init.redis.js');
+const client = require('../models/clientRedis.model.js');
 const random = require('lodash');
 const userModel = require('../models/user.model.js');
+const UserService = require('../services/user.service.js');
 class OTPService {
     static async generateOTP(email){
         try{
             const otpCode = random.random(100000, 999999).toString();
-            const user = await userModel.findOne({email});
-            if(!user) return 0;
+            // const user = await userModel.findOne({email});
+            // if(!user) return 0;
             await client.setEx(`otp:${email}`, 300, otpCode);
             const check = await client.get(`otp:${email}`) ;
-            console.log(check);
+            // console.log(check);
             return otpCode;
         }catch(error){
             throw new Error(error);
@@ -25,7 +26,7 @@ class OTPService {
             metadata: null
         };
         if(otpClient !== otpCode) return {
-            code: 200,
+            code: 400,
             message: 'Wrong OTP',
             metadata: null
         }

@@ -1,6 +1,8 @@
 'use strict';
 const {createClient} = require('redis');
+const session = require('express-session');
 const dotenv = require("dotenv");
+const {RedisStore} = require('connect-redis');
 dotenv.config();
 const client = createClient({
     username: 'default',
@@ -10,6 +12,17 @@ const client = createClient({
         port: process.env.REDIS_PORT,
     }
 });
+
+const redisSession = session({
+    store: new RedisStore({
+        client: client,
+        ttl: process.env.REDIS_EXPIRY,
+    }),
+    secret: process.env.REDIS_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+});
+
 class RedisConnection {
     static async connect(){
         client.on('error', (err) => console.error('❌ Redis Error:', err));
@@ -24,7 +37,7 @@ class RedisConnection {
     };
 }
 
-module.exports = {client, RedisConnection};
+module.exports = {client, redisSession, RedisConnection};
 
  
 
