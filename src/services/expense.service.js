@@ -5,8 +5,6 @@ const {getInfoData, checkValidId, removeNullUndefinedAttribute} = require("../ut
 
 class FeeService {
     static getExpense = async (Body, userId) => {
-        console.log(Body)
-
         if(!checkValidId(userId)) {
             return {
                 code: 400,
