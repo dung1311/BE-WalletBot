@@ -3,10 +3,10 @@
 const express = require("express");
 const router = express.Router();
 const feeController = require("../../controllers/expense.controller");
-const authenticate = require("../../middleware/authMiddleware")
+const {authenticate, authenticateV2} = require("../../middleware/authMiddleware")
 
 // midleware
-router.use(authenticate)
+router.use(authenticateV2)
 
 router.get("/get-expense", feeController.getExpense);
 router.get("/:expenseId", feeController.findExpense)

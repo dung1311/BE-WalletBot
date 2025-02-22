@@ -12,10 +12,13 @@ const keyTokenSchema = new Schema(
       ref: "User",
       required: true,
     },
-    refreshToken: {
+    refreshTokenUsed: {
       type: Array,
       default: [],
     },
+    refreshToken: {
+      type: String
+    }
   },
   {
     collection: COLLECTION_NAME,
