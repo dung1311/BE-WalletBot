@@ -28,7 +28,7 @@ const expenseSchema = new Schema(
     category: {
       type: String,
       required: true,
-      enum: ["Giải trí", "Mua sắm", "Di chuyển", "Sức khỏe", "Khác"],
+      enum: ["Giải trí", "Mua sắm", "Di chuyển", "Sức khỏe", "Ăn uống", "Hóa đơn", "Khác"],
     },
     description: {
       type: String,
