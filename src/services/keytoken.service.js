@@ -56,9 +56,7 @@ class KeyTokenService{
         return jwt.verify(token, process.env.JWT_SECRET_REFRESH);
     }
     
-    static async refreshAccessToken(req, res){
-        const refreshToken = req.refreshToken;
-
+    static async refreshAccessToken(refreshToken){
         if (!refreshToken) {
             return {
                 code: 400,
@@ -84,7 +82,7 @@ class KeyTokenService{
 
                 return {
                     code: 400,
-                    message: "Something wrong, please relogin",
+                    message: "Something wrong, please re-login",
                     metadata: null
                 }
             }

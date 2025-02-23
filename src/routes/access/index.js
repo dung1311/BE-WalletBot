@@ -6,9 +6,17 @@ const AuthController = require("../../controllers/auth.controller");
 const {authenticate, authenticateV2} = require("../../middleware/authMiddleware");
 
 router.post("/register", AuthController.register);
+router.post("/confirmRegister", AuthController.confirmRegister);
 router.post("/login", AuthController.login);
-
-// middleware
+router.post("/otp", AuthController.otp);
+router.post("/forgotPassword", AuthController.forgotPassword);
+router.post("/resetPassword", AuthController.resetPassword);
+router.post("/verifyOTP", (req, res) =>{
+    console.log(req.headers);
+    if(req.headers['x-ssid'])
+        return AuthController.confirmRegister(req, res);
+    else { AuthController.resetPassword(req, res);}
+});
 router.use(authenticateV2)
 
 router.post("/refresh-token", AuthController.refreshAccessToken);
