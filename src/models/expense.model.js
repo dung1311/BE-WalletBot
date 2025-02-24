@@ -14,14 +14,21 @@ const expenseSchema = new Schema(
     },
     wallet: {
       type: String,
+      required: true,
     },
     partner: {
       type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["gửi", "nhận"],
     },
     category: {
       type: String,
       required: true,
-      enum: ["quần áo", "sách vở", "ăn uống", "giải trí", "khác"],
+      enum: ["giải trí", "mua sắm", "di chuyển", "sức khỏe", "ăn uống", "hóa đơn", "nợ", "khác"],
     },
     description: {
       type: String,
