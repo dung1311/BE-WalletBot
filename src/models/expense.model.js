@@ -1,5 +1,6 @@
 "use strict";
 
+const { get } = require("lodash");
 const { mongoose, model, Schema, Types } = require("mongoose");
 const { default: slugify } = require("slugify");
 
@@ -12,10 +13,23 @@ const expenseSchema = new Schema(
       type: Number,
       required: true,
     },
+    wallet: {
+      type: String,
+      required: true,
+    },
+    partner: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["gửi", "nhận"],
+    },
     category: {
       type: String,
       required: true,
-      enum: ["quần áo", "sách vở", "ăn uống", "giải trí", "khác"],
+      enum: ["giải trí", "mua sắm", "di chuyển", "sức khỏe", "ăn uống", "hóa đơn", "nợ", "khác"],
     },
     description: {
       type: String,
@@ -51,6 +65,6 @@ expenseSchema.pre("findOneAndUpdate", function(next) {
   next();
 })
 // create index
-expenseSchema.index({expense_slug: "text", description: "text"});
+expenseSchema.index({partner: "text", expense_slug: "text", description: "text"});
 
 module.exports = model(DOCUMENT_NAME, expenseSchema);
