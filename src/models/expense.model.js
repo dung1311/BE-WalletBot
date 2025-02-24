@@ -12,6 +12,12 @@ const expenseSchema = new Schema(
       type: Number,
       required: true,
     },
+    wallet: {
+      type: String,
+    },
+    partner: {
+      type: String,
+    },
     category: {
       type: String,
       required: true,
@@ -51,6 +57,6 @@ expenseSchema.pre("findOneAndUpdate", function(next) {
   next();
 })
 // create index
-expenseSchema.index({expense_slug: "text", description: "text"});
+expenseSchema.index({partner: "text", expense_slug: "text", description: "text"});
 
 module.exports = model(DOCUMENT_NAME, expenseSchema);

@@ -6,12 +6,10 @@ const OTPService = require("../services/otp.service");
 
 class AuthController {
     static async register(req, res) {
-        // const {name,email,password} = req.body;
         const response = await UserService.register(req);
         return res.status(response.code).json(response);
     }
     static async confirmRegister(req, res) {
-        const {sessionId, email, otpCode} = req.body;
         const response = await UserService.confirmRegister(req);
         return res.status(response.code).json(response);
     }

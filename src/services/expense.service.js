@@ -1,5 +1,5 @@
 "use strict";
-
+const mongoose = require("mongoose");
 const expenseModel = require("../models/expense.model");
 const {getInfoData, checkValidId, removeNullUndefinedAttribute} = require("../utils/index");
 
@@ -161,6 +161,200 @@ class FeeService {
             code: 200,
             message: "Update success",
             metadata: getInfoData({fields: ["_id", "amount", "description", "category"], object: holderExpense})
+        }
+    }
+    static getExpenseByAmount = async({amount, sinceBy = "2025-01-01"}, userId)=>{
+        try{
+            if(!checkValidId(userId)){
+                return {
+                    code: 400,
+                    message: "Invalid user ID",
+                    metadata: null,
+                }
+            }
+            try{
+                const timeToSearch = new Date(sinceBy);
+                const expenseList = await expenseModel.find({
+                    userId: userId,
+                    amount: Number(amount),
+                    createdAt: {$gte: timeToSearch},
+                });
+                return {
+                    code: 200,
+                    message: `"Get some expense with ${amount} since ${sinceBy}"`,
+                    metadata: {
+                        expense: expenseList,
+                    }
+                }
+            }catch (e) {
+                return {
+                    code: 400,
+                    message: "Can't get expense by amount"
+                }
+            }
+            
+        }catch (e) {
+            return {
+                code: 500,
+                message: "Error processing expense list",
+                metadata: null
+            }
+        }
+    }
+    static getExpenseByDate = async({from = "2025-01-01", to = "2029-01-01"}, userId)=>{
+        try{
+            if(!checkValidId(userId)){
+                return {
+                    code: 400,
+                    message: "Invalid user ID",
+                    metadata: null,
+                }
+            }
+            try{
+                const dateFrom = new Date(from);
+                const dateTo = new Date(to);
+                const expenseList = await expenseModel.find({
+                    userId: userId, 
+                    createdAt: {$gte:dateFrom},
+                    updatedAt: {$lt:dateTo}
+                });
+                return {
+                    code: 200,
+                    message: `"Get some expense since ${dateFrom} to ${dateTo}"`,
+                    metadata: {
+                        expense: expenseList,
+                    }
+                }
+            }catch(e){
+                return {
+                    code: 404,
+                    message: "Can't get expense by date",
+                    metadata: null,
+                }             
+            }
+        }catch (err) {
+            return {
+                code: 500,
+                message: "Error processing expense list",
+                metadata: null
+            }
+        }
+    }
+    static getExpenseByCategory = async({category = "khác"}, userId)=>{
+        try{
+            if(!checkValidId(userId)){
+                return {
+                    code: 400,
+                    message: "Invalid user ID",
+                    metadata: null,
+                }
+            }
+            try{
+                const expenseList = await expenseModel.find({
+                userId: userId, 
+                category: category
+                });
+                return {
+                    code: 200,
+                    message: `"Get some expense by category"`,
+                    metadata: {
+                        expense: expenseList,
+                    }
+                }
+            }catch(e) {
+                return {
+                    code: 400,
+                    message: "can't get expense by category",
+                    metadata: null
+                }
+            }
+        }catch (err) {
+                return {
+                    code: 500,
+                    message: "Error processing expense list",
+                    metadata: null
+                }
+            }
+    }
+    static sortExpenses = async({option = 1}, userId) => {
+        try{
+            if(!checkValidId(userId)){
+            return {
+                code: 400,
+                message: "Invalid user ID",
+                metadata: null,
+            }
+            }
+            const optionSort = Number(option);
+            try{
+                const expenseList = await expenseModel.find({userId}).sort({amount: optionSort});
+                return {
+                    code: 200,
+                    message: "Sorted expense list",
+                    metadata: {
+                        expense: expenseList,
+                    }
+                }
+            }
+            catch(err){
+                return {
+                    code: 404,
+                    message: "Can't sort expense",
+                    metadata: null,
+                }
+            }
+        }
+        catch (err) {
+            return {
+                code: 500,
+                message: "Error processing expense list",
+                metadata: null
+            }
+        }
+    }
+    static sortPartner = async({option = 1}, userId) => {
+        try{
+            if(!checkValidId(userId)){
+            return {
+                code: 400,
+                message: "Invalid user ID",
+                metadata: null,
+            }
+            }
+            const optionSort = Number(option);
+            const userObjectId = new mongoose.Types.ObjectId(userId);
+            try{
+                const expenseList = await expenseModel.aggregate([
+                    {$match: {userId: userObjectId}},
+                    {$group: {
+                            _id: "$partner",
+                            count: {$sum: 1}
+                        }},
+                    {$sort: {count: optionSort}},
+                ])
+                return {
+                    code: 200,
+                    message: "Sorted partner list",
+                    metadata: {
+                        expense: expenseList,
+                    }
+                }
+            }
+            catch(err){
+                console.error(err);
+                return {
+                    code: 404,
+                    message: "Can't sort partner list",
+                    metadata: null,
+                }
+            }
+        }
+        catch (err) {
+            return {
+                code: 500,
+                message: "Error processing expense list",
+                metadata: null
+            }
         }
     }
 }

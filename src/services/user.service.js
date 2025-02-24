@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const KeyTokenService = require("./keytoken.service");
 const OTPService = require("./otp.service");
 const client = require("../models/clientRedis.model.js");
+const { isNull } = require("lodash");
 class UserService {
     static async getAllUsers() {
         try {
@@ -69,7 +70,10 @@ class UserService {
 
     }
     static async confirmRegister(req) {
-        const { email, otpCode, sessionId} = req.body;
+        const { email, otpCode} = req.body;
+        console.log(req.headers);
+        const sessionId = req.headers['x-ssid'];
+        console.log(sessionId);
         const verifyOTP = await OTPService.verifyOTP(email, otpCode);
         if(verifyOTP.code !== 200){
             return verifyOTP;
@@ -92,7 +96,7 @@ class UserService {
         const refreshToken = KeyTokenService.generateRefreshToken(payload);
 
         let keyToken = await KeyTokenService.createKeyToken({
-            userID: newUser.id,
+            userID: newUser._id,
             refreshToken: refreshToken,
         });
         return {
@@ -156,9 +160,14 @@ class UserService {
         return sendOTP;
     }
     static async resetPassword(email, otpCode, newPassword, reNewPassword){
-        if(newPassword !== reNewPassword) return {
+        if(newPassword !== reNewPassword ) return {
             code: 400,
             message: "New password and reNew Password do not match",
+            metadata: null,
+        }
+        if(newPassword.length < 8) return {
+            code: 400,
+            message: "Password must be at least 8 characters",
             metadata: null,
         }
         const verifyOTP = await OTPService.verifyOTP(email, otpCode);
@@ -212,7 +221,7 @@ class UserService {
             const content = `Here is your OTP CODE: ${otpCode}`;
             await sendEmail(content, email);
             return {
-                code: 201,
+                code: 200,
                 message: 'Sent OTP',
                 metadata: {
                     otpCode: otpCode,

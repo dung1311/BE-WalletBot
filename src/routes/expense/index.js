@@ -5,6 +5,7 @@ const router = express.Router();
 const feeController = require("../../controllers/expense.controller");
 const {authenticate, authenticateV2} = require("../../middleware/authMiddleware")
 
+
 // midleware
 router.use(authenticateV2)
 
@@ -18,5 +19,10 @@ router.delete("/:expenseId", feeController.deleteExpense)
 
 router.patch("/:expenseId", feeController.updateExpense)
 
+router.get("/getExpenseByAmount", feeController.getExpenseByAmount);
+router.get("/getExpenseByDate", feeController.getExpenseByDate);
+router.get("/getExpenseByCategory", feeController.getExpenseByCategory);
+router.get("/sortExpenses", feeController.sortExpenses);
+router.get("/sortPartner", feeController.sortPartner);
 module.exports = router;
 
