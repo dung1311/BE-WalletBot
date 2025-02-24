@@ -36,32 +36,27 @@ class FeeController {
     })
 
     getExpenseByAmount = asyncHandler(async (req, res) => {
-        const {userId} = req.body;
-        const response = await FeeService.getExpenseByAmount(req.query, userId );
+        const response = await FeeService.getExpenseByAmount(req.query, req.user.id );
         return res.status(response.code).json(response);
     })
 
     getExpenseByDate = asyncHandler(async (req, res) => {
-        const {userId} = req.body;
-        const response = await FeeService.getExpenseByDate(req.query, userId);
+        const response = await FeeService.getExpenseByDate(req.query, req.user.id);
         return res.status(response.code).json(response);
     })
 
     getExpenseByCategory = asyncHandler(async (req, res) => {
-        const {userId} = req.body;
-        const response = await FeeService.getExpenseByCategory(req.query, userId);
+        const response = await FeeService.getExpenseByCategory(req.query, req.user.id);
         return res.status(response.code).json(response);
     })
 
     sortExpenses = asyncHandler(async (req, res) => {
-        const {userId} = req.body;
-        const response = await FeeService.sortExpenses(req.query, userId);
+        const response = await FeeService.sortExpenses(req.query, req.user.id);
         return res.status(response.code).json(response);
     })
 
     sortPartner = asyncHandler(async (req, res) => {
-        const {userId} = req.body;
-        const response = await FeeService.sortPartner(req.query, userId);
+        const response = await FeeService.sortPartner(req.query, req.user.id);
         return res.status(response.code).json(response);
     })
 

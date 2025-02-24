@@ -188,7 +188,7 @@ class FeeService {
                 }
             }catch (e) {
                 return {
-                    code: 400,
+                    code: 404,
                     message: "Can't get expense by amount"
                 }
             }
@@ -263,7 +263,7 @@ class FeeService {
                 }
             }catch(e) {
                 return {
-                    code: 400,
+                    code: 404,
                     message: "can't get expense by category",
                     metadata: null
                 }
@@ -328,7 +328,13 @@ class FeeService {
                     {$match: {userId: userObjectId}},
                     {$group: {
                             _id: "$partner",
-                            count: {$sum: 1}
+                            count: {$sum: 1},
+                            amount: {$sum: "$amount"}  ,
+                            list: {$push: {
+                                amount: "$amount",
+                                category: "$category",
+                                description: "$description",
+                            }}                      
                         }},
                     {$sort: {count: optionSort}},
                 ])
