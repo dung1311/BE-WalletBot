@@ -19,7 +19,7 @@ class AuthController {
         return res.status(response.code).json(response);
     }
     static refreshAccessToken = async (req, res) => {
-        const refreshToken = req.body
+        const {refreshToken }= req.body
         const response = await KeyTokenService.refreshAccessToken(refreshToken);
         return res.status(response.code).json(response);
     };
