@@ -77,50 +77,12 @@ class UserService {
         }
     }
     static async confirmRegister(req) {
-<<<<<<< Updated upstream
-        const { email, otpCode} = req.body;
-        console.log(req.headers);
-        const sessionId = req.headers['x-ssid'];
-        console.log(sessionId);
-        const verifyOTP = await OTPService.verifyOTP(email, otpCode);
-        if(verifyOTP.code !== 200){
-            return verifyOTP;
-        }
-        const curUserString = await client.get(`sessionId:${sessionId}`);
-        if(!curUserString) return {
-            code: 400,
-            message: "Session expired or invalid",
-            metadata: null,
-        }
-        const curUser = JSON.parse(curUserString);
-        const newUser = await User.create(curUser);
-        req.session.destroy();
-        const payload = {
-            id: newUser._id,
-            name: newUser.name,
-            email: newUser.email,
-        }
-        const accessToken = KeyTokenService.generateAccessToken(payload);
-        const refreshToken = KeyTokenService.generateRefreshToken(payload);
-
-        let keyToken = await KeyTokenService.createKeyToken({
-            userID: newUser._id,
-            refreshToken: refreshToken,
-        });
-        return {
-            code: 201,
-            message: "Create new user successfully",
-            metadata: {
-                "access_token": accessToken,
-                "refresh_token": refreshToken
-=======
         try{
             const { email, otpCode} = req.body;
             const sessionId = req.headers['x-ssid'];
             const verifyOTP = await OTPService.verifyOTP(email, otpCode);
             if(verifyOTP.code !== 200){
                 return verifyOTP;
->>>>>>> Stashed changes
             }
             const curUserString = await client.get(`sessionId:${sessionId}`);
             if(!curUserString) return {
