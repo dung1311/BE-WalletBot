@@ -12,7 +12,6 @@ router.post("/otp", AuthController.otp);
 router.post("/forgotPassword", AuthController.forgotPassword);
 // router.post("/resetPassword", AuthController.resetPassword);
 router.post("/verifyOTP", (req, res) =>{
-    // console.log(req.headers);
     if(req.headers['x-ssid'])
         return AuthController.confirmRegister(req, res);
     else { AuthController.resetPassword(req, res);}
