@@ -100,9 +100,20 @@ class KeyTokenService{
 
             await KeyTokenService.updateTokens(userId, refreshToken, newRefreshToken);
 
-            res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+            return {
+                code: 200,
+                message: 'Access token updated successfully',
+                metadata:{
+                    accessToken: newAccessToken,
+                    refreshToken: newRefreshToken,
+                }
+            }
         } catch (error) {
-            res.status(403).json({ message: "Invalid or Expired Refresh Token." });
+            return {
+                code: 500,
+                message: 'Couldn\'t update access token',
+                metadata: null
+            }
         }
     }
 }

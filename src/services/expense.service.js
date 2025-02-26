@@ -21,7 +21,6 @@ class FeeService {
             page, pageSize
         } = Body;
 
-
         if(!(page && pageSize)) {
             return {
                 code: 400,
@@ -133,7 +132,6 @@ class FeeService {
     }
 
     static addExpense = async (Body, userId) => {
-        console.log(Body)
         const {
             amount,
             category,
@@ -149,9 +147,10 @@ class FeeService {
                 metadata: null 
             }
         }
+        const amountInt = Number(amount).toFixed(5) * 100000;
         const newExpense = await expenseModel.create({
             userId: userId,
-            amount: amount,
+            amount: amountInt,
             wallet: wallet,
             type: type,
             partner: partner,
@@ -207,7 +206,6 @@ class FeeService {
 
     static updateExpense = async({expenseId}, bodyUpdate, userId) => {
         if(!checkValidId(expenseId) || !checkValidId(userId)){
-            console.log(expenseId)
             return {
                 code: 400,
                 message: "Invalid expenseId or userId",
@@ -243,9 +241,10 @@ class FeeService {
             }
             try{
                 const timeToSearch = new Date(sinceBy);
+                const amountInt = Number(amount).toFixed(5) * 100000;
                 const expenseList = await expenseModel.find({
                     userId: userId,
-                    amount: Number(amount),
+                    amount: amountInt,
                     createdAt: {$gte: timeToSearch},
                 });
                 return {
