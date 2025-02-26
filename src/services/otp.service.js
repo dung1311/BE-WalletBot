@@ -11,7 +11,6 @@ class OTPService {
             // if(!user) return 0;
             await client.setEx(`otp:${email}`, 300, otpCode);
             const check = await client.get(`otp:${email}`) ;
-            // console.log(check);
             return otpCode;
         }catch(error){
             throw new Error(error);

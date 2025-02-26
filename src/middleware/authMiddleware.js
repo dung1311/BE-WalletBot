@@ -17,11 +17,8 @@ const authenticate = async (req, res, next) => {
     const decoded = KeyTokenService.verifyAccessToken(
       token.replace("Bearer ", "")
     );
-    
-    // console.log(decoded);
     req.user = decoded;
     const keyToken = await KeyTokenService.getKeyTokenById(decoded.id);
-    // console.log(keyToken);
     if (!keyToken) {
       return res.status(403).json({ message: "Invalid token." });
     }

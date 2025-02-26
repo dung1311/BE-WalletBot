@@ -71,9 +71,7 @@ class UserService {
     }
     static async confirmRegister(req) {
         const { email, otpCode} = req.body;
-        console.log(req.headers);
         const sessionId = req.headers['x-ssid'];
-        console.log(sessionId);
         const verifyOTP = await OTPService.verifyOTP(email, otpCode);
         if(verifyOTP.code !== 200){
             return verifyOTP;
