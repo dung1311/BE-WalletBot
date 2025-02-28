@@ -42,6 +42,7 @@ class FeeController {
 
     getExpenseByAmount = asyncHandler(async (req, res) => {
         const response = await FeeService.getExpenseByAmount(req.query, req.user.id );
+        console.log(req.query)
         return res.status(response.code).json(response);
     })
 

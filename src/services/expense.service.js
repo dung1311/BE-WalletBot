@@ -248,6 +248,9 @@ class FeeService {
                     amount: amountInt,
                     createdAt: {$gte: timeToSearch},
                 });
+                for (let i = 0; i < expenseList.length; i++) {
+                    expenseList[i].amount = expenseList[i].amount / 100000;
+                }
                 return {
                     code: 200,
                     message: `"Get some expense with ${amount} since ${sinceBy}"`,
@@ -287,6 +290,9 @@ class FeeService {
                     createdAt: {$gte:dateFrom},
                     updatedAt: {$lt:dateTo}
                 });
+                for (let i = 0; i < expenseList.length; i++) {
+                    expenseList[i].amount = expenseList[i].amount / 100000;     
+                }    
                 return {
                     code: 200,
                     message: `"Get some expense since ${dateFrom} to ${dateTo}"`,
@@ -323,6 +329,9 @@ class FeeService {
                 userId: userId, 
                 category: category
                 });
+                for (let i = 0; i < expenseList.length; i++) {
+                    expenseList[i].amount = expenseList[i].amount / 100000;
+                }
                 return {
                     code: 200,
                     message: `"Get some expense by category"`,
@@ -357,6 +366,9 @@ class FeeService {
             const optionSort = Number(option);
             try{
                 const expenseList = await expenseModel.find({userId}).sort({amount: optionSort});
+                for (let i = 0; i < expenseList.length; i++) {
+                    expenseList[i].amount = expenseList[i].amount / 100000;
+                }
                 return {
                     code: 200,
                     message: "Sorted expense list",
@@ -407,6 +419,12 @@ class FeeService {
                         }},
                     {$sort: {count: optionSort}},
                 ])
+                for (let i = 0; i < expenseList.length; i++) {
+                    expenseList[i].amount = expenseList[i].amount / 100000;
+                    for (let j = 0; j < expenseList[i].list.length; j++) {
+                        expenseList[i].list[j].amount = expenseList[i].list[j].amount / 100000;
+                    }
+                }
                 return {
                     code: 200,
                     message: "Sorted partner list",
