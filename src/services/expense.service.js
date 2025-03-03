@@ -62,30 +62,6 @@ class FeeService {
         }
     };
     
-    // static getExpense = async ({pageSize=10, page=1}, userId) => {
-    //     if(!checkValidId(userId)) {
-    //         return {
-    //             code: 400,
-    //             message: "Invalid expenseId",
-    //             metadata: null 
-    //         }
-    //     }
-
-    //     const expenses = await expenseModel
-    //     .find({userId: userId})
-    //     .sort({_id: -1})
-    //     .skip((page-1)*pageSize)
-    //     .limit(pageSize)
-
-    //     return {
-    //         code: 200,
-    //         messages: "Get all expense list success",
-    //         metadata: {
-    //             expenses: expenses,
-    //         }
-    //     }
-    // };
-
     static findExpense = async ({expenseId}, userId) => {
         if(!checkValidId(expenseId) || !checkValidId(userId)){
             return {
@@ -234,7 +210,7 @@ class FeeService {
             metadata: holderExpense
         }
     }
-    static getExpenseByAmount = async({amount, sinceBy = "2025-01-01"}, userId)=>{
+    static getExpenseByAmount = async({amount, sinceBy = "2025-01-01", page=1, pageSize=5}, userId)=>{
         try{
             if(!checkValidId(userId)){
                 return {
@@ -246,11 +222,12 @@ class FeeService {
             try{
                 const timeToSearch = new Date(sinceBy);
                 const amountInt = Number(amount).toFixed(5) * 100000;
+                const sortOption = { ['createdAt']: -1 };
                 const expenseList = await expenseModel.find({
                     userId: userId,
                     amount: amountInt,
                     createdAt: {$gte: timeToSearch},
-                });
+                }).sort(sortOption).skip((page-1)*pageSize).limit(pageSize);
                 for (let i = 0; i < expenseList.length; i++) {
                     expenseList[i].amount = expenseList[i].amount / 100000;
                 }

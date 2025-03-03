@@ -14,7 +14,6 @@ class FeeController {
         return res.status(200).json(response);
     });
     getExpense = asyncHandler(async (req, res, next) => {
-        // console.log(req.user.id)
         const response = await FeeService.getExpense(req.query, req.user.id);
         return res.status(response.code).json(response);
     });
@@ -35,14 +34,12 @@ class FeeController {
     })
 
     updateExpense = asyncHandler(async (req, res, next) => {
-        console.log(req.params)
         const response = await FeeService.updateExpense(req.params, req.body, req.user.id);
         return res.status(response.code).json(response)
     })
 
     getExpenseByAmount = asyncHandler(async (req, res) => {
         const response = await FeeService.getExpenseByAmount(req.query, req.user.id );
-        console.log(req.query)
         return res.status(response.code).json(response);
     })
 
