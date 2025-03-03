@@ -42,6 +42,9 @@ class FeeService {
             let query = expenseModel.find(filter).sort(sortOption).skip((page-1)*pageSize).limit(pageSize);
 
             const expenses = await query;
+            for (let i = 0; i < expenses.length; i++) {
+                expenses[i].amount = expenses[i].amount / 100000;
+            }
             
             return {
                 code: 200,
