@@ -224,7 +224,6 @@ class UserService {
                 code: 200,
                 message: 'Sent OTP',
                 metadata: {
-                    otpCode: otpCode,
                     sessionId: null,
                 }
             }
