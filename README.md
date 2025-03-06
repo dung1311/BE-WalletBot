@@ -42,15 +42,20 @@ npm start
 ```
 📂 BE-WalletBot  
  ┣ 📂 src   # Source code chính  
+ ┃ ┣ 📂 auth  # Xử lý xác thực người dùng  
+ ┃ ┣ 📂 configs  # Cấu hình ứng dụng (biến môi trường, kết nối DB, Redis)  
  ┃ ┣ 📂 controllers  # Xử lý logic API  
+ ┃ ┣ 📂 dbs  # Kết nối cơ sở dữ liệu  
+ ┃ ┣ 📂 middleware  # Middleware bảo mật và xác thực  
  ┃ ┣ 📂 models  # Định nghĩa mô hình dữ liệu (MongoDB)  
  ┃ ┣ 📂 routes  # Định nghĩa các route API  
- ┃ ┣ 📂 middleware  # Middleware bảo mật và xác thực  
- ┃ ┣ 📂 config  # Cấu hình ứng dụng  
+ ┃ ┣ 📂 services  # Chứa các service tách biệt logic với controller  
+ ┃ ┣ 📂 utils  # Các hàm tiện ích (format, xử lý dữ liệu, mã hóa, v.v.)  
  ┃ ┗ 📄 server.js  # Điểm khởi động của ứng dụng  
  ┣ 📄 package.json  
  ┣ 📄 .env.example  
  ┣ 📄 README.md  
+
 ```
 
 ## 🔑 Cấu hình Môi trường (`.env`)
