@@ -129,5 +129,6 @@ npm test
 
 ## 📞 Liên hệ
 🔗 GitHub: [BE-WalletBot](https://github.com/dung1311/BE-WalletBot)
-📧 Email: your-email@example.com
+📧 Email: co.adm1n.sup@gmail.com
+
 
